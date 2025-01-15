@@ -10,11 +10,11 @@ export class TestEnvironment extends Environment {
     }
 
     public step() {
-        super.step()
         for (let individual of this.individuals) {
             individual.brain.think(this.randomInput())
             individual.score = this.randomScore()
         }
+        super.step()
     }
 
     public populate(amount: number = 10) {
@@ -26,6 +26,7 @@ export class TestEnvironment extends Environment {
     public spawn() {
         let genome = this.evolution.new_genome(this.genePool)
         let body = new Body(genome)
+        for (let i = 0; i < Math.floor(1+Math.random()); i++) this.evolution.mutate_link(body.genome, this.genePool)
         this.individuals.push(body)
     }
 

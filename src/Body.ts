@@ -26,7 +26,7 @@ export class Body {
             hash += node.innovation_number
         }
         for (let connection of this.genome.connections.getAll()) {
-            hash += connection.getHash()
+            hash += connection.from.innovation_number + connection.to.innovation_number
         }
         return hash
     }

@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Body } from "./Body";
 import { SPECIATION_THRESHOLD } from "./config";
 import { RandomHashSet } from "./data_structures/random_hashset";
@@ -20,9 +21,10 @@ class SpeciesStore extends RandomHashSet {
  * Species is a collection of individuals that are similar to each other.
  */
 export class Species {
+    public id = randomUUID()
     public evolution: Evolution
     public genePool: GenePool
-    public individuals: SpeciesStore = new SpeciesStore()
+    public individuals: Body[] = []
     /** The individual that represents the species. Typically the first memeber of the species */
     public representative: Body
     /** Average score of all individuals in species */
@@ -33,7 +35,7 @@ export class Species {
         this.genePool = genePool
         this.representative = representative
         representative.species = this
-        this.individuals.add(representative)
+        this.individuals.push(representative)
     }
 
     /**
@@ -58,17 +60,17 @@ export class Species {
     */
     public _add(individual: Body): void {
         individual.species = this
-        this.individuals.add(individual)
+        this.individuals.push(individual)
     }
 
     /**
      * Remove all individuals from the species.
      */
     public extinction(): void {
-        for (let individual of this.individuals.getAll()) {
+        for (let individual of this.individuals) {
             individual.species = null
         }
-        this.individuals.clear()
+        this.individuals = []
     }
 
     /**
@@ -76,24 +78,29 @@ export class Species {
      */
     public evaluate(): void {
         let total = 0
-        for (let individual of this.individuals.getAll()) {
+        for (let individual of this.individuals) {
             total += individual.score
         }
-        this.score = total / this.individuals.size()
+        this.score = total / this.individuals.length
     }
 
     /**
      * Choose a new representative for the species and remove all indiviudals from the species.
      */
     public reset(): void {
-        this.representative = this.individuals.getRandom()
-        for (let individual of this.individuals.getAll()) {
+        // select a random member of the species to be the new representative
+        this.representative = this.getRandom()
+        for (let individual of this.individuals) {
             individual.species = null
         }
-        this.individuals.clear()
+        this.individuals = []
         this.representative.species = this
-        this.individuals.add(this.representative)
+        this.individuals.push(this.representative)
         this.score = 0
+    }
+
+    public getRandom(): Body {
+        return this.individuals[Math.floor(Math.random() * this.individuals.length)]
     }
 
     /**
@@ -103,13 +110,13 @@ export class Species {
      * @todo: could use 3 sigma to determine who dies
      */
     public kill(percentage: number = 0.5): void {
-        console.log(`Current Scores: ${this.individuals.getAll().map(i => i.score).join(", ")}`)
-        let sorted = this.individuals.getAll().sort((a, b) => a.score - b.score)
+        console.log(`Current Scores: ${this.individuals.map(i => i.score).join(", ")}`)
+        let sorted = this.individuals.sort((a, b) => a.score - b.score)
         let kill_count = Math.floor(sorted.length * percentage)
         for (let i = 0; i < kill_count; i++) {
             console.log(`Killing ${sorted[i].score}`)
             sorted[i].species = null
-            this.individuals.remove(sorted)
+            this.individuals.splice(i,1)
         }
     }
 
@@ -127,7 +134,7 @@ export class Species {
     }
 
     public population (): number {
-        return this.individuals.size()
+        return this.individuals.length
     }
 
 
