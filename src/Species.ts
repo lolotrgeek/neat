@@ -1,12 +1,13 @@
 import { randomUUID } from "crypto";
 import { Body } from "./Body";
 import { SPECIATION_THRESHOLD } from "./config";
-import { RandomHashSet } from "./data_structures/random_hashset";
 import { Evolution } from "./Evolution";
 import { GenePool } from "./GenePool";
 
 const DEBUG = false
 const log = (msg: string) => DEBUG && console.log(msg)
+
+export type SpeciesId = string
 
 /**
  * Species is a collection of individuals that are similar to each other.
@@ -25,7 +26,7 @@ export class Species {
         this.evolution = evolution
         this.genePool = genePool
         this.representative = representative
-        representative.species = this
+        representative.species = this.id
         this.individuals.push(representative)
     }
 
@@ -50,7 +51,7 @@ export class Species {
      * @returns
     */
     public _add(individual: Body): void {
-        individual.species = this
+        individual.species = this.id
         this.individuals.push(individual)
     }
 
@@ -76,18 +77,20 @@ export class Species {
     }
 
     /**
-     * Choose a new representative for the species and remove all indiviudals from the species.
+     * Choose a new representative for the species, orphan all other individuals and set score to 0.
      */
-    public reset(): void {
+    public reset(): Body[] {
         // select a random member of the species to be the new representative
         this.representative = this.getRandom()
         for (let individual of this.individuals) {
             individual.species = null
         }
+        const orphans = this.individuals
         this.individuals = []
-        this.representative.species = this
+        this.representative.species = this.id
         this.individuals.push(this.representative)
         this.score = 0
+        return orphans
     }
 
     public getRandom(): Body {
@@ -105,7 +108,6 @@ export class Species {
         let sorted = this.individuals.sort((a, b) => a.score - b.score)
         let kill_count = Math.floor(sorted.length * percentage)
         for (let i = 0; i < kill_count; i++) {
-            log(`Killing ${sorted[i].score}`)
             sorted[i].species = null
             this.individuals.splice(i,1)
         }

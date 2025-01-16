@@ -1,11 +1,15 @@
+import { randomUUID } from "crypto"
 import { Brain } from "./brain/Brain"
 import { Genome } from "./genome/Genome"
-import { Species } from "./Species"
+import { SpeciesId } from "./Species"
+
+export type BodyId = string
 
 export class Body {
+    public id: BodyId = randomUUID()
     public genome: Genome
     public brain: Brain 
-    public species: Species | null = null
+    public species: SpeciesId | null = null
     /** the individual's fitness */
     public score: number = 0
 
