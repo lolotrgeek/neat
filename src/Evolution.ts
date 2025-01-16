@@ -118,13 +118,13 @@ export class Evolution {
 
             let connection: ConnectionGene | undefined
 
-            if(node1.x < node2.x) {
+            if (node1.x < node2.x) {
                 connection = new ConnectionGene(node1, node2)
             }
             else {
                 connection = new ConnectionGene(node2, node1)
             }
-            if(genome.connections.contains(connection)) continue
+            if (genome.connections.contains(connection)) continue
 
             connection.innovation_number = this.createConnection(node1, node2, gene_pool).innovation_number
             connection.weight = (Math.random() * 2 - 1) * WEIGHT_RANDOM_STRENGTH
@@ -141,14 +141,25 @@ export class Evolution {
      */
     public mutate_node(genome: Genome, gene_pool: GenePool): void {
         const connection = genome.connections.getRandom() as ConnectionGene
-        if(!connection) return
+        if (!connection) return
 
         const from_node = connection.from
         const to_node = connection.to
 
-        const middle_node = this.createNode(gene_pool)
-        middle_node.x = (from_node.x + to_node.x) / 2
-        middle_node.y = (from_node.y + to_node.y) / 2 + NODE_Y_OFFSET
+
+        const existing_connection = gene_pool.getConnection(from_node, to_node)
+        let middle_node: NodeGene | undefined
+
+        if(existing_connection) {
+            middle_node = this.getNode(existing_connection.replaceIndex, gene_pool)
+        }
+
+        if (!existing_connection || !middle_node) {
+            middle_node = this.createNode(gene_pool)
+            middle_node.x = (from_node.x + to_node.x) / 2
+            middle_node.y = (from_node.y + to_node.y) / 2 + NODE_Y_OFFSET
+            gene_pool.addConnection(gene_pool.getConnectionId(from_node, to_node), middle_node.innovation_number)
+        }
 
         const new_connection1 = this.createConnection(from_node, middle_node, gene_pool)
         const new_connection2 = this.createConnection(middle_node, to_node, gene_pool)
@@ -230,13 +241,13 @@ export class Evolution {
      */
     public createConnection(node_1: NodeGene, node_2: NodeGene, gene_pool: GenePool): ConnectionGene {
         const connection = new ConnectionGene(node_1, node_2);
-        const connection_id: ConnectionId = `${node_1.innovation_number}_${node_2.innovation_number}`;
-        const existing_innovation_number = gene_pool.all_connections.get(connection_id);
-        if (existing_innovation_number) {
-            connection.innovation_number = existing_innovation_number
+        const connection_id = gene_pool.getConnectionId(node_1, node_2);
+        const existing_connection = gene_pool.all_connections.get(connection_id);
+        if (existing_connection) {
+            connection.innovation_number = existing_connection.innovation_number
         } else {
             connection.innovation_number = gene_pool.all_connections.size + 1;
-            gene_pool.all_connections.set(connection_id, connection.innovation_number);
+            gene_pool.addConnection(connection_id, connection.innovation_number);
         }
         return connection;
     }

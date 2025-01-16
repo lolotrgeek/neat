@@ -5,6 +5,9 @@ import { Evolution } from "./Evolution";
 import { GenePool } from "./GenePool";
 import { Species } from "./Species";
 
+const DEBUG = false
+const log = (msg: string) => DEBUG && console.log(msg)
+
 export class Environment {
     public evolution: Evolution
     public genePool: GenePool
@@ -35,14 +38,14 @@ export class Environment {
             for (const species of this.species) {
                 if (species.add(individual)) {
                     found = true
-                    console.log(`Added individual to existing species ${species.id}, ${species.individuals} individuals`);
+                    log(`Added individual to existing species ${species.id}, ${species.individuals} individuals`);
                     break
                 }
             }
             if (!found) {
                 const species = new Species(individual, this.evolution, this.genePool)
                 this.species.push(species)
-                console.log(`Created new species ${species.id}`);
+                log(`Created new species ${species.id}`);
             }
         }
         for (const species of this.species) {
@@ -61,11 +64,11 @@ export class Environment {
         for (let i = this.species.length - 1; i >= 0; i--) {
             if (this.species[i].individuals.length <= 1) {
                 this.species[i].extinction()
-                console.log(`Species ${i} has gone extinct`)
+                log(`Species ${i} has gone extinct`)
                 this.species.splice(i, 1)
             }
         }
-        console.log(`Remaining species: ${this.species.length}`)
+        log(`Remaining species: ${this.species.length}`)
     }
 
     public reproduce() {
@@ -73,12 +76,9 @@ export class Environment {
         for (const species of this.species) {
             select_random.add(species, species.score)
         }
-        console.log(select_random)
         for (let individual of this.individuals) {
             if (individual.species !== null) {
                 const species = select_random.select()
-                
-                console.log(species)
                 //randomly select parents
                 const parent1 = species.getRandom()
                 const parent2 = species.getRandom()

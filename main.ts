@@ -2,26 +2,27 @@ import http from 'http';
 import { Evolution } from "./src/Evolution";
 import { GenePool } from "./src/GenePool";
 import { Brain } from './src/brain/Brain';
-import { Species } from './src/Species';
-import { Body } from './src/Body';
-import { Environment } from './src/Environment';
 import { TestEnvironment } from './src/testEnv';
 
 const input_size = 3;
 const output_size = 2;
 const inputs = [1, 1, 1];
 
+const population_size = 100
+
 const gene_pool = new GenePool();
-const evolution = new Evolution(input_size, output_size, 100, gene_pool);
+const evolution = new Evolution(input_size, output_size, population_size, gene_pool);
 const environment = new TestEnvironment(evolution, gene_pool);
 
-let genome = evolution.new_genome(gene_pool);
+evolution.reset(input_size, output_size, population_size, gene_pool);
+environment.populate(population_size);
 
-evolution.reset(input_size, output_size, 100, gene_pool);
-environment.populate();
-environment.step();
+// take 100 steps
+for (let i = 0; i < 100; i++)environment.step();
 
-console.log(environment.species)
+let genome = environment.individuals[0].genome;
+
+console.log(genome)
 
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');

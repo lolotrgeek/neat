@@ -12,8 +12,9 @@
 			}
 		</style>
 	</head>
-	<body>
+	<body onload="loadGenome()">
 		<div id="buttons">
+			<button onclick="loadGenome()">Refresh</button>
 			<button onclick="mutate('mutateLink')">Mutate Link</button>
 			<button onclick="mutate('mutateNode')">Mutate Node</button>
 			<button onclick="mutate('mutateWeightShift')">Mutate Weight Shift</button>
@@ -22,20 +23,26 @@
 			</button>
 			<button onclick="mutate('mutateLinkToggle')">Mutate Link Toggle</button>
 			<button onclick="stimulate()">Stimulate</button>
-			<button onclick="reset()">Reset</button>
+			<button onclick="resetGenome()">Reset</button>
 		</div>
 
 		<canvas id="genomeCanvas" width="800" height="600"></canvas>
 		<div id="stimulateOutput"></div>
 
 		<script>
+			async function loadGenome() {
+				const response = await fetch("http://localhost:3000/")
+				const genome = await response.json()
+				renderGenome(genome)
+			}
+
 			async function mutate(endpoint) {
 				const response = await fetch(`http://localhost:3000/${endpoint}`)
 				const genome = await response.json()
 				renderGenome(genome)
 			}
 
-			async function reset() {
+			async function resetGenome() {
 				const response = await fetch("http://localhost:3000/reset")
 				const genome = await response.json()
 				renderGenome(genome)

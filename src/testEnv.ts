@@ -13,6 +13,8 @@ export class TestEnvironment extends Environment {
         for (let individual of this.individuals) {
             individual.brain.think(this.randomInput())
             individual.score = this.randomScore()
+            this.evolution.mutate(individual.genome, this.genePool)
+            // console.log(individual.genome.getConnections().map(c => c.innovation_number).join(' '))
         }
         super.step()
     }

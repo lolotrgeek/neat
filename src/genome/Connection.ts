@@ -9,6 +9,9 @@ export class ConnectionGene extends Gene {
     public weight: number = 1
     public enabled: boolean = true
 
+    /** Update to track if/when this connection gets replaced. Used to keep innovation number consistent across the gene pool. */
+    public replaceIndex: number = NaN
+
     constructor(from: NodeGene, to: NodeGene) {
         super();
         this.from = from;

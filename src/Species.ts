@@ -5,17 +5,8 @@ import { RandomHashSet } from "./data_structures/random_hashset";
 import { Evolution } from "./Evolution";
 import { GenePool } from "./GenePool";
 
-class SpeciesStore extends RandomHashSet {
-    public data: Body[]
-    public map: Map<number, Body>
-
-    constructor() {
-        super();
-        this.data = [] as Body[]
-        this.map = new Map<number, Body>();
-    }
-
-}
+const DEBUG = false
+const log = (msg: string) => DEBUG && console.log(msg)
 
 /**
  * Species is a collection of individuals that are similar to each other.
@@ -110,11 +101,11 @@ export class Species {
      * @todo: could use 3 sigma to determine who dies
      */
     public kill(percentage: number = 0.5): void {
-        console.log(`Current Scores: ${this.individuals.map(i => i.score).join(", ")}`)
+        log(`Current Scores: ${this.individuals.map(i => i.score).join(", ")}`)
         let sorted = this.individuals.sort((a, b) => a.score - b.score)
         let kill_count = Math.floor(sorted.length * percentage)
         for (let i = 0; i < kill_count; i++) {
-            console.log(`Killing ${sorted[i].score}`)
+            log(`Killing ${sorted[i].score}`)
             sorted[i].species = null
             this.individuals.splice(i,1)
         }
