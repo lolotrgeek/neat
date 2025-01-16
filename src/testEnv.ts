@@ -10,10 +10,9 @@ export class TestEnvironment extends Environment {
     }
 
     public step() {
-        for (let individual of this.individuals) {
+        for (let individual of this.individuals()) {
             individual.brain.think(this.randomInput())
             individual.score = this.randomScore()
-            this.evolution.mutate(individual.genome, this.genePool)
             // console.log(individual.genome.getConnections().map(c => c.innovation_number).join(' '))
         }
         super.step()
@@ -25,11 +24,18 @@ export class TestEnvironment extends Environment {
         }
     }
 
+    public reproduce(): void {
+        // Call reproduce between 10 and 20 times
+        for (let i = 0; i < Math.floor(Math.random() * 10) + 10; i++) super.reproduce()
+    }
+
     public spawn() {
         let genome = this.evolution.new_genome(this.genePool)
         let body = new Body(genome)
-        for (let i = 0; i < Math.floor(1+Math.random()); i++) this.evolution.mutate_link(body.genome, this.genePool)
-        this.individuals.push(body)
+        // call mutate_link between 10 and 20 times
+        for (let i = 0; i < Math.floor(Math.random() * 10) + 10; i++) this.evolution.mutate_link(genome, this.genePool)
+        this.assign_species(body)
+        // console.table(body.genome.connections.getAll().map(c => ({ in: c.innovation_number, weight: c.weight })))
     }
 
     public randomScore() {
