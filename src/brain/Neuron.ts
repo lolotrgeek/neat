@@ -9,6 +9,7 @@ export class Neuron {
     public y: number = .9;
 
     public output: number = 0;
+
     /** Which other neurons are we connected from */
     public connections: Synapse[] = [];
 
@@ -16,7 +17,7 @@ export class Neuron {
         this.x = x;
         this.y = y;
     }
-     // TODO: make this functional
+    
     /**
      * Stimulate the neuron, invoking it's activation function
      */
@@ -51,6 +52,18 @@ export class Neuron {
         if(this.x > other.x) return -1
         if(this.x < other.x) return 1
         return 0
+    }
+
+    public toJSON() {
+        return {
+            output: this.output,
+            connections: this.connections.map(conn => ({
+                weight: conn.weight,
+                enabled: conn.enabled,
+                from: `${conn.from.x}_${conn.from.y}`,
+                to: `${conn.to.x}_${conn.to.y}`
+            }))
+        };
     }
 
 }

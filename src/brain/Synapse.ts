@@ -14,5 +14,12 @@ export class Synapse {
         this.to = to;
     }
 
-    
+    public toJSON() {
+        return {
+            from: `${this.from.x}_${this.from.y}`,
+            to:`${this.to.x}_${this.to.y}`,
+            weight: this.weight,
+            enabled: this.enabled
+        };
+    }
 }
