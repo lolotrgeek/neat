@@ -3,41 +3,109 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>NEAT Visualization</title>
-		<style>
-			#buttons {
-				margin-bottom: 10px;
-			}
-			button {
-				margin-right: 5px;
-			}
-		</style>
+        <style>
+            #buttons {
+              margin-bottom: 10px;
+            }
+            button {
+              margin-right: 5px;
+            }
+            #sidebar {
+              float: left;
+              width: 200px;
+              height: 1000px;
+              overflow-y: scroll;
+              border-right: 1px solid #ccc;
+              padding-right: 10px;
+            }
+            #content {
+              margin-left: 220px;
+            }
+            .selected {
+              background-color: grey;
+            }
+          </style>
 	</head>
-	<body onload="loadGenome()">
-		<div id="buttons">
-			<button onclick="loadGenome()">Refresh</button>
-			<button onclick="mutate('mutateLink')">Mutate Link</button>
-			<button onclick="mutate('mutateNode')">Mutate Node</button>
-			<button onclick="mutate('mutateWeightShift')">Mutate Weight Shift</button>
-			<button onclick="mutate('mutateWeightRandom')">
-				Mutate Weight Random
-			</button>
-			<button onclick="mutate('mutateLinkToggle')">Mutate Link Toggle</button>
-			<button onclick="stimulate()">Stimulate</button>
-			<button onclick="resetGenome()">Reset</button>
+	<body onload="loadSpecies()">
+		<div id="sidebar">
+			<h3>Species</h3>
+            <div id="populationCount"></div>
+			<div id="speciesList"></div>
 		</div>
-
-		<canvas id="genomeCanvas" width="800" height="600"></canvas>
-		<div id="stimulateOutput"></div>
+		<div id="content">
+			<div id="buttons">
+				<button onclick="loadSpecies()">Refresh</button>
+				<button onclick="mutate('mutateLink')">Mutate Link</button>
+				<button onclick="mutate('mutateNode')">Mutate Node</button>
+				<button onclick="mutate('mutateWeightShift')">
+					Mutate Weight Shift
+				</button>
+				<button onclick="mutate('mutateWeightRandom')">
+					Mutate Weight Random
+				</button>
+				<button onclick="mutate('mutateLinkToggle')">Mutate Link Toggle</button>
+				<button onclick="stimulate()">Stimulate</button>
+				<button onclick="resetGenome()">Reset</button>
+			</div>
+			<canvas id="genomeCanvas" width="800" height="600"></canvas>
+			<div id="stimulateOutput"></div>
+		</div>
+		<script src="./src/visual/renderGenome.js"></script>
 
 		<script>
-			async function loadGenome() {
+			async function loadSpecies() {
 				const response = await fetch("http://localhost:3000/")
+				const species = await response.json()
+				const speciesList = document.getElementById("speciesList")
+				speciesList.innerHTML = ""
+                let totalPopulation = 0;
+                let totalSpecies = 0;
+
+				species.forEach((s, sIndex) => {
+					const speciesDiv = document.createElement("div")
+					speciesDiv.innerHTML = `<strong>Species ${s.id}</strong>`
+					const individualsList = document.createElement("ul")
+
+					s.individuals.forEach((ind, iIndex) => {
+						const individualItem = document.createElement("li")
+						individualItem.innerHTML = `Individual ${
+							ind.id
+						} (Score: ${ind.score.toFixed(2)})`
+						individualItem.onclick = () => {
+							loadGenome(sIndex, iIndex)
+							highlightIndividual(individualItem)
+						}
+						individualsList.appendChild(individualItem)
+					})
+
+					speciesDiv.appendChild(individualsList)
+					speciesList.appendChild(speciesDiv)
+                    totalPopulation += s.individuals.length;
+				})
+                populationCount.innerHTML = `Total Population: ${totalPopulation}`;
+			}
+
+			function highlightIndividual(element) {
+				const selected = document.querySelector(".selected")
+				if (selected) {
+					selected.classList.remove("selected")
+				}
+				element.classList.add("selected")
+			}
+
+			async function loadGenome(sIndex = 0, iIndex = 0) {
+				console.log(sIndex, iIndex)
+				const response = await fetch(
+					`http://localhost:3000/genome?species=${sIndex}&individual=${iIndex}`
+				)
 				const genome = await response.json()
 				renderGenome(genome)
 			}
 
-			async function mutate(endpoint) {
-				const response = await fetch(`http://localhost:3000/${endpoint}`)
+			async function mutate(endpoint, sIndex = 0, iIndex = 0) {
+				const response = await fetch(
+					`http://localhost:3000/${endpoint}?species=${sIndex}&individual=${iIndex}`
+				)
 				const genome = await response.json()
 				renderGenome(genome)
 			}
@@ -48,55 +116,16 @@
 				renderGenome(genome)
 			}
 
-			async function stimulate() {
-				const response = await fetch("http://localhost:3000/stimulate")
+			async function stimulate(sIndex = 0, iIndex = 0) {
+				const response = await fetch(
+					`http://localhost:3000/stimulate?species=${sIndex}&individual=${iIndex}`
+				)
 				const results = await response.json()
 				document.getElementById("stimulateOutput").textContent =
 					JSON.stringify(results)
 			}
 
-			// Draws nodes as circles and connections as lines
-			function renderGenome(genome) {
-				const canvas = document.getElementById("genomeCanvas")
-				const ctx = canvas.getContext("2d")
-				ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-				// Scale coords (assuming x,y are in [0..1])
-				function scaleCoord(x, y) {
-					return [x * canvas.width, y * canvas.height]
-				}
-
-				// Draw connections
-				const connections = genome.connections?.data || []
-				connections.forEach((conn) => {
-					const [x1, y1] = scaleCoord(conn.from.x, conn.from.y)
-					const [x2, y2] = scaleCoord(conn.to.x, conn.to.y)
-					ctx.beginPath()
-					ctx.moveTo(x1, y1)
-					ctx.lineTo(x2, y2)
-					// If disabled, draw red line
-					ctx.strokeStyle = conn.enabled ? "#000" : "red"
-					ctx.stroke()
-
-					// Show weight with 2 decimal places
-					const midX = (x1 + x2) / 2
-					const midY = (y1 + y2) / 2
-					ctx.font = "12px Arial"
-					ctx.fillStyle = "#000"
-					ctx.fillText(conn.weight.toFixed(2), midX, midY)
-				})
-
-				// Draw nodes
-				const nodes = genome.nodes?.data || []
-				nodes.forEach((node) => {
-					const [cx, cy] = scaleCoord(node.x, node.y)
-					ctx.beginPath()
-					ctx.arc(cx, cy, 10, 0, 2 * Math.PI)
-					ctx.fillStyle = "#3498db"
-					ctx.fill()
-					ctx.stroke()
-				})
-			}
+			setInterval(loadSpecies, 1000)
 		</script>
 	</body>
 </html>
