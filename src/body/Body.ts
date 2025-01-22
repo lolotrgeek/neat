@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto"
-import { Brain } from "./brain/Brain"
-import { Genome } from "./genome/Genome"
-import { SpeciesId } from "./Species"
+import { Brain } from "../brain/Brain"
+import { Genome } from "../genome/Genome"
+import { SpeciesId } from "../Species"
 
 export type BodyId = string
 

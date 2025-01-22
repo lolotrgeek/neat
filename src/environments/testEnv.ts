@@ -1,7 +1,7 @@
-import { Body } from "./Body";
-import { Environment } from "./Environment";
-import { Evolution } from "./Evolution";
-import { GenePool } from "./GenePool";
+import { Body } from "../body/Body";
+import { Environment } from "../environment/Environment";
+import { Evolution } from "../Evolution";
+import { GenePool } from "../GenePool";
 
 export class TestEnvironment extends Environment {
     public input_size = 3;

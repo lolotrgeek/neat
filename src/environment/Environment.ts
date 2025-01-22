@@ -1,10 +1,10 @@
 import { runInThisContext } from "vm";
-import { Body } from "./Body";
-import { BIRTH_RATE, CULL_THRESHOLD } from "./config";
-import { RandomSelector } from "./data_structures/random_selector";
-import { Evolution } from "./Evolution";
-import { GenePool } from "./GenePool";
-import { Species, SpeciesId } from "./Species";
+import { Body } from "../body/Body";
+import { BIRTH_RATE, CULL_THRESHOLD } from "../config";
+import { RandomSelector } from "../data_structures/random_selector";
+import { Evolution } from "../Evolution";
+import { GenePool } from "../GenePool";
+import { Species, SpeciesId } from "../Species";
 
 const DEBUG = false
 const log = (msg: string) => DEBUG && console.log(msg)

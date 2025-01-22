@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { Body } from "./Body";
+import { Body } from "./body/Body";
 import { SPECIATION_THRESHOLD } from "./config";
 import { Evolution } from "./Evolution";
 import { GenePool } from "./GenePool";

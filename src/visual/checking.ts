@@ -2,7 +2,7 @@ import http from 'http';
 import { Evolution } from "../Evolution";
 import { GenePool } from "../GenePool";
 import { Brain } from '../brain/Brain';
-import { TestEnvironment } from '../testEnv';
+import { TestEnvironment } from '../environments/testEnv';
 
 const input_size = 3;
 const output_size = 2;

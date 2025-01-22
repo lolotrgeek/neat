@@ -2,7 +2,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { parse } from 'url';
 import { Evolution } from './src/Evolution'
 import { GenePool } from './src/GenePool'
-import { TestEnvironment } from './src/testEnv'
+import { TestEnvironment } from './src/environments/testEnv'
 
 const input_size = 3
 const output_size = 2
