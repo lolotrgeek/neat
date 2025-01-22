@@ -3,33 +3,36 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>NEAT Visualization</title>
-        <style>
-            #buttons {
-              margin-bottom: 10px;
-            }
-            button {
-              margin-right: 5px;
-            }
-            #sidebar {
-              float: left;
-              width: 200px;
-              height: 1000px;
-              overflow-y: scroll;
-              border-right: 1px solid #ccc;
-              padding-right: 10px;
-            }
-            #content {
-              margin-left: 220px;
-            }
-            .selected {
-              background-color: grey;
-            }
-          </style>
+		<style>
+			#buttons {
+				margin-bottom: 10px;
+			}
+			button {
+				margin-right: 5px;
+			}
+			#sidebar {
+				float: left;
+				width: 200px;
+				height: 1000px;
+				overflow-y: scroll;
+				border-right: 1px solid #ccc;
+				padding-right: 10px;
+			}
+			#content {
+				margin-left: 220px;
+			}
+			.selected {
+				background-color: grey;
+			}
+			.individuals-list {
+				display: none;
+			}
+		</style>
 	</head>
 	<body onload="loadSpecies()">
 		<div id="sidebar">
 			<h3>Species</h3>
-            <div id="populationCount"></div>
+			<div id="populationCount"></div>
 			<div id="speciesList"></div>
 		</div>
 		<div id="content">
@@ -53,25 +56,35 @@
 		<script src="./src/visual/renderGenome.js"></script>
 
 		<script>
+			let expandedSpecies = new Set()
+
 			async function loadSpecies() {
 				const response = await fetch("http://localhost:3000/")
 				const species = await response.json()
 				const speciesList = document.getElementById("speciesList")
+				const populationCount = document.getElementById("populationCount")
 				speciesList.innerHTML = ""
-                let totalPopulation = 0;
-                let totalSpecies = 0;
+				let totalPopulation = 0
 
 				species.forEach((s, sIndex) => {
 					const speciesDiv = document.createElement("div")
 					speciesDiv.innerHTML = `<strong>Species ${s.id}</strong>`
+					speciesDiv.onclick = () => toggleIndividualsList(sIndex)
 					const individualsList = document.createElement("ul")
+					individualsList.classList.add("individuals-list")
+					individualsList.id = `individuals-list-${sIndex}`
+
+					if (expandedSpecies.has(sIndex)) {
+						individualsList.style.display = "block"
+					}
 
 					s.individuals.forEach((ind, iIndex) => {
 						const individualItem = document.createElement("li")
 						individualItem.innerHTML = `Individual ${
 							ind.id
 						} (Score: ${ind.score.toFixed(2)})`
-						individualItem.onclick = () => {
+						individualItem.onclick = (event) => {
+							event.stopPropagation()
 							loadGenome(sIndex, iIndex)
 							highlightIndividual(individualItem)
 						}
@@ -80,9 +93,26 @@
 
 					speciesDiv.appendChild(individualsList)
 					speciesList.appendChild(speciesDiv)
-                    totalPopulation += s.individuals.length;
+					totalPopulation += s.individuals.length
 				})
-                populationCount.innerHTML = `Total Population: ${totalPopulation}`;
+
+				populationCount.innerHTML = `Total Population: ${totalPopulation}`
+			}
+
+			function toggleIndividualsList(sIndex) {
+				const individualsList = document.getElementById(
+					`individuals-list-${sIndex}`
+				)
+				if (
+					individualsList.style.display === "none" ||
+					individualsList.style.display === ""
+				) {
+					individualsList.style.display = "block"
+					expandedSpecies.add(sIndex)
+				} else {
+					individualsList.style.display = "none"
+					expandedSpecies.delete(sIndex)
+				}
 			}
 
 			function highlightIndividual(element) {
