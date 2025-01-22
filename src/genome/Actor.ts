@@ -5,4 +5,10 @@ export class ActorGene extends Gene {
     constructor() {
         super()
     }
+
+    // for example, if we generate an actor gene for a "buy" action, with parameters:
+    // - amount to spend
+    // - slippage
+
+    // evolution can mutate these parameters within a range
 }

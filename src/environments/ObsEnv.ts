@@ -1,29 +1,38 @@
 import { Body } from "../body/Body";
 import { Environment } from "../environment/Environment";
+import { Lever } from "../environment/Lever";
 import { Observable } from "../environment/Observable";
 import { Evolution } from "../Evolution";
 import { GenePool } from "../GenePool";
 
+export type Levers = Array<(...args: any[]) => any>
+
 export class ObservationEnvrionment extends Environment {
     public observables: Observable[] = []
+    
+    /** allows a gene to map to a lever ( a gene with expression 0, maps brain output0 to pull lever at 0 index) */
+    public levers: Lever[] = []
     public population_size: number
-    public actions: any[] = []
-    constructor(observables: Observable[]) { 
+
+    constructor(observables: Observable[], levers: Lever[]) { 
         const genePool = new GenePool()
-        const actions = [1,2,3]
         const population_size = 1000
-        const evolution = new Evolution(observables.length, actions.length, population_size, genePool)
+        const evolution = new Evolution(observables.length, levers.length, population_size, genePool)
         super(evolution, genePool)
         this.population_size = population_size
         this.observables = observables
-        this.actions = actions
+        this.levers = levers
     
     }
 
         public step() {
+            // run each observation 
+            for (let observable of this.observables) observable.observe()
+            
             for (let individual of this.individuals()) {
-                let observations = this.observables.map(o => o.observe())
-                individual.brain.think(observations)
+                let inputs = individual.sensors.map(sensor => sensor.sense()) 
+                let outputs = individual.brain.think(inputs)
+                individual.actions.map((action, i) => this.levers[action.lever].act(outputs[i]))
                 individual.score = this.randomScore()
                 // console.log(individual.genome.getConnections().map(c => c.innovation_number).join(' '))
             }
@@ -51,7 +60,7 @@ export class ObservationEnvrionment extends Environment {
         }
 
         public reset() {
-            this.evolution.reset(this.observables.length, this.actions.length, this.population_size, this.genePool)
+            this.evolution.reset(this.observables.length, this.levers.length, this.population_size, this.genePool)
         }
 
 

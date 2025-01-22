@@ -1,8 +1,14 @@
+import { randomUUID } from "crypto"
+
 export class Observable {
+    public id = randomUUID()
+    public data: any
     constructor() { }
 
     /** Numeric Encoding of some state space. */
-    observe(): number {
-        return Math.random()
+    observe(): void {
+        this.data = Math.random()
     }
+
+    // 
 }
