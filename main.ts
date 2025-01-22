@@ -2,17 +2,16 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { parse } from 'url';
 import { Evolution } from './src/Evolution'
 import { GenePool } from './src/GenePool'
-import { TestEnvironment } from './src/testEnv'
+import { TestEnvironment } from './src/environments/testEnv'
+import { ObservationEnvrionment } from './src/environments/ObsEnv';
+import { Observable } from './src/environment/Observable';
 
 const input_size = 3
-const output_size = 2
-const population_size = 1000
-const gene_pool = new GenePool()
-const evolution = new Evolution(input_size, output_size, population_size, gene_pool)
-const environment = new TestEnvironment(evolution, gene_pool)
+const observables = Array.from({ length: 10 }, () => new Observable())
+const environment = new ObservationEnvrionment(observables)
 
-evolution.reset(input_size, output_size, population_size, gene_pool)
-environment.populate(population_size)
+environment.populate(environment.population_size)
+
 // console.table(environment.individuals().map(individual => ({ id: individual.id, species: individual.species })))
 
 setInterval(() => environment.step(), 1000)
@@ -49,27 +48,27 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       break;
     case '/mutateLink':
       if (!genome) break;
-      evolution.mutate_link(genome, gene_pool);
+      environment.evolution.mutate_link(genome, environment.genePool);
       res.end(JSON.stringify(genome));
       break;
     case '/mutateNode':
       if (!genome) break;
-      evolution.mutate_node(genome, gene_pool);
+      environment.evolution.mutate_node(genome, environment.genePool);
       res.end(JSON.stringify(genome));
       break;
     case '/mutateWeightShift':
       if (!genome) break;
-      evolution.mutate_weight_shift(genome);
+      environment.evolution.mutate_weight_shift(genome);
       res.end(JSON.stringify(genome));
       break;
     case '/mutateWeightRandom':
       if (!genome) break;
-      evolution.mutate_weight_random(genome);
+      environment.evolution.mutate_weight_random(genome);
       res.end(JSON.stringify(genome));
       break;
     case '/mutateLinkToggle':
       if (!genome) break;
-      evolution.mutate_link_toggle(genome);
+      environment.evolution.mutate_link_toggle(genome);
       res.end(JSON.stringify(genome));
       break;
     case '/stimulate':
