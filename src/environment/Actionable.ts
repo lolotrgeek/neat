@@ -1,7 +1,6 @@
 
-
-/** A set of possible actions */
-export class Lever {
+/** A possible action */
+export class Actionable {
     constructor() { }
 
     /** Perform the action */
