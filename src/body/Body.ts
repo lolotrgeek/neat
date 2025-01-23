@@ -20,7 +20,6 @@ export class Body {
     constructor(genome: Genome) {
         this.genome = genome
         this.brain = new Brain(genome)
-        // TODO: add actors and sensors
     }
 
     public distance(body: Body): number {
@@ -30,7 +29,7 @@ export class Body {
     /**
      * Decodes the output of the brain to an action, the first output with the highest value is selected. 
      * 
-     * `TODO`: could add a threshold to select the action and confidence levels
+     * `TODO`: could add a threshold to parameterize the action based on strength and confidence levels
      * @param out 
      * @returns the index of the action to perform 
      */

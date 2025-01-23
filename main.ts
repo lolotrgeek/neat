@@ -1,15 +1,13 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { parse } from 'url';
-import { Evolution } from './src/Evolution'
-import { GenePool } from './src/GenePool'
-import { TestEnvironment } from './src/environments/testEnv'
 import { ObservationEnvrionment } from './src/environments/ObsEnv';
 import { Observable } from './src/environment/Observable';
+import { Actionable } from './src/environment/Actionable';
 
-const input_size = 3
 const observables = Array.from({ length: 10 }, () => new Observable())
-const environment = new ObservationEnvrionment(observables)
-
+const actionables = Array.from({ length: 3 }, () => new Actionable())
+const environment = new ObservationEnvrionment(observables, actionables)
+environment.reset()
 environment.populate(environment.population_size)
 
 // console.table(environment.individuals().map(individual => ({ id: individual.id, species: individual.species })))
@@ -78,7 +76,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
         break;
       }
       const individual = species.individuals[individualIndex];
-      const randomInput = Array.from({ length: input_size }, () => Math.random());
+      const randomInput = Array.from({ length: individual.sensors.length }, () => Math.random());
       const output = individual.brain.think(randomInput);
       res.end(JSON.stringify(output));
       break;

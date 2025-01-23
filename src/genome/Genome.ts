@@ -1,10 +1,10 @@
-import { DISJOINT_IMPORTANCE, EXCESS_IMPORTANCE, MUTATE_LINK_PERMUTATIONS, WEIGHT_DIFFERENCE_IMPORTANCE, WEIGHT_RANDOM_STRENGTH, WEIGHT_SHIFT_STRENGTH } from "../config";
+import { DISJOINT_IMPORTANCE, EXCESS_IMPORTANCE, WEIGHT_DIFFERENCE_IMPORTANCE } from "../config";
 import { ConnectionGene } from "./Connection";
 import { GeneStore } from "./Gene";
 import { NodeGene } from "./Node";
 
 /**
- * A Genome is a collection of nodes and connections that represent instructions to spawn a neural network
+ * A Genome is a collection of genes with instructions to spawn a Body with inputs (senses), outputs (actors), & brain (neural network)
  */
 export class Genome {
     public connections = new GeneStore();

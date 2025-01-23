@@ -1,5 +1,6 @@
 import { MUTATE_LINK_PERMUTATIONS, NODE_Y_OFFSET, PROABILITY_MUTATE_LINK, PROABILITY_MUTATE_NODE, PROABILITY_MUTATE_TOGGLE, PROABILITY_MUTATE_WEIGHT_RANDOM, PROABILITY_MUTATE_WEIGHT_SHIFT, WEIGHT_RANDOM_STRENGTH, WEIGHT_SHIFT_STRENGTH } from "./config";
 import { ConnectionId, GenePool } from "./GenePool";
+import { ActorGene } from "./genome/Actor";
 import { ConnectionGene } from "./genome/Connection";
 import { Genome } from "./genome/Genome";
 import { NodeGene } from "./genome/Node";
@@ -8,20 +9,27 @@ import { NodeGene } from "./genome/Node";
  * Rules for evolving a population of genomes
  */
 export class Evolution {
-    // TODO: dynamic input and output sizes per individual genome, needs actor and sensor node typings, can use type of actor and senor to speciate
-    public input_size: number = 0;
-    public output_size: number = 0;
     public max_population_size: number = 0;
 
-    constructor(input_size: number, output_size: number, population_size: number, gene_pool: GenePool) {
-        this.reset(input_size, output_size, population_size, gene_pool);
+    public min_input_size: number = 1;
+    public min_output_size: number = 1;
+
+    public max_input_size: number = 3;
+    public max_output_size: number = 3;
+
+    public longest_input_size: number = 1;
+    public longest_output_size: number = 1;
+
+    constructor(population_size: number, gene_pool: GenePool) {
+        this.reset(population_size, gene_pool);
     }
 
     /** Creates a new Empty Genome */
-    public new_genome(gene_pool: GenePool): Genome {
+    public new_genome(gene_pool: GenePool, inputs = 3, outputs = 3): Genome {   
         const genome = new Genome();
-        // TODO: dynamic inputs and outputs, determined by actor and sensor genes
-        for (let i = 0; i < this.input_size + this.output_size; i++) {
+        if(inputs > this.longest_input_size) this.longest_input_size = inputs
+        if(outputs > this.longest_output_size) this.longest_output_size = outputs
+        for (let i = 0; i < inputs + outputs; i++) {
             genome.nodes.add(gene_pool.all_nodes[i]);
         }
         return genome;
@@ -211,24 +219,27 @@ export class Evolution {
         }
     }
 
-    public reset(input_size: number, output_size: number, population_size: number, gene_pool: GenePool): void {
+    /**
+     * Reset evolution by clearing the gene pool and adding max input and output nodes to gene pool
+     * @param population_size 
+     * @param gene_pool
+     * @returns
+     * */
+    public reset(population_size: number, gene_pool: GenePool): void {
         gene_pool.all_connections.clear();
         gene_pool.all_nodes = [];
-        this.input_size = input_size;
-        this.output_size = output_size;
         this.max_population_size = population_size;
 
-
-        for (let i = 0; i < input_size; i++) {
+        for (let i = 0; i < this.max_input_size; i++) {
             const new_input = this.createNode(gene_pool);
             new_input.x = 0.1;
-            new_input.y = (i + 1) / (input_size + 1);
+            new_input.y = (i + 1) / (this.max_input_size + 1);
         }
 
-        for (let i = 0; i < output_size; i++) {
+        for (let i = 0; i < this.max_output_size; i++) {
             const new_output = this.createNode(gene_pool);
             new_output.x = 0.9;
-            new_output.y = (i + 1) / (output_size + 1);
+            new_output.y = (i + 1) / (this.max_output_size + 1);
         }
     }
 
