@@ -35,10 +35,10 @@ export class Species {
      * @param individual 
      * @returns 
      */
-    public add(individual: Body): boolean {
+    public add(individual: Body, threshold = SPECIATION_THRESHOLD): boolean {
         // TODO: speciation should first be based on type of actor (output) and sensor (input) genes
         // SUB species then is determined by distance between genomes
-        if (individual.distance(this.representative) < SPECIATION_THRESHOLD) {
+        if (individual.distance(this.representative) < threshold) {
             this._add(individual)
             return true
         }
