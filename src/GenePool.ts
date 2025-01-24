@@ -16,8 +16,20 @@ export interface Connection {
 export class GenePool {
     /** A map of all connections across the entire environment */
     public all_connections: Map<ConnectionId, Connection> = new Map();
-    /** A map of all nodes. Is this necessary? If we are going to put nodes in a Brain Object? */
-    public all_nodes: Array<NodeGene> = [];
+    public input_nodes: Array<NodeGene> = [];
+    public output_nodes: Array<NodeGene> = [];
+
+    public addInputNode(node: NodeGene) {
+        this.input_nodes.push(node);
+    }
+
+    public addOutputNode(node: NodeGene) {
+        this.output_nodes.push(node);
+    }
+
+    public allNodes(): NodeGene[] {
+        return [...this.input_nodes, ...this.output_nodes];
+    }
 
     public getConnectionId(from: NodeGene, to: NodeGene): ConnectionId {
         return `${from.innovation_number}_${to.innovation_number}`;

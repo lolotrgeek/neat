@@ -24,13 +24,30 @@ export class Evolution {
         this.reset(population_size, gene_pool);
     }
 
-    /** Creates a new Empty Genome */
-    public new_genome(gene_pool: GenePool, inputs = 3, outputs = 3): Genome {   
+    /**
+     * Creates a new genome with given inputs and outputs 
+     * 
+     * `NOTE:` must populate gene pool with nodes first! Call this.reset()
+     * @param gene_pool 
+     * @param inputs 
+     * @param outputs 
+     * @returns 
+     */
+    public new_genome(gene_pool: GenePool, inputs = 3, outputs = 3): Genome {
         const genome = new Genome();
-        if(inputs > this.longest_input_size) this.longest_input_size = inputs
-        if(outputs > this.longest_output_size) this.longest_output_size = outputs
-        for (let i = 0; i < inputs + outputs; i++) {
-            genome.nodes.add(gene_pool.all_nodes[i]);
+        if (inputs > this.longest_input_size) {
+            this.longest_input_size = inputs
+        }
+        if (outputs > this.longest_output_size) {
+            this.longest_output_size = outputs
+        }
+
+        for (let i = 0; i < inputs; i++) {
+            genome.nodes.add(gene_pool.input_nodes[i]);
+        }
+
+        for (let i = 0; i < outputs; i++) {
+            genome.nodes.add(gene_pool.output_nodes[i]);
         }
         return genome;
     }
@@ -158,7 +175,7 @@ export class Evolution {
         const existing_connection = gene_pool.getConnection(from_node, to_node)
         let middle_node: NodeGene | undefined
 
-        if(existing_connection) {
+        if (existing_connection) {
             middle_node = this.getNode(existing_connection.replaceIndex, gene_pool)
         }
 
@@ -227,17 +244,18 @@ export class Evolution {
      * */
     public reset(population_size: number, gene_pool: GenePool): void {
         gene_pool.all_connections.clear();
-        gene_pool.all_nodes = [];
+        gene_pool.input_nodes = [];
+        gene_pool.output_nodes = [];
         this.max_population_size = population_size;
 
         for (let i = 0; i < this.max_input_size; i++) {
-            const new_input = this.createNode(gene_pool);
+            const new_input = this.createNode(gene_pool, "input");
             new_input.x = 0.1;
             new_input.y = (i + 1) / (this.max_input_size + 1);
         }
 
         for (let i = 0; i < this.max_output_size; i++) {
-            const new_output = this.createNode(gene_pool);
+            const new_output = this.createNode(gene_pool, "output");
             new_output.x = 0.9;
             new_output.y = (i + 1) / (this.max_output_size + 1);
         }
@@ -263,17 +281,18 @@ export class Evolution {
         return connection;
     }
 
-    public createNode(gene_pool: GenePool): NodeGene {
+    public createNode(gene_pool: GenePool, type="input"): NodeGene {
         const node = new NodeGene()
-        node.innovation_number = gene_pool.all_nodes.length + 1
+        node.innovation_number = gene_pool.allNodes().length + 1
         node.x = Math.random()
         node.y = Math.random()
-        gene_pool.all_nodes.push(node)
+        if(type === "input") gene_pool.addInputNode(node)
+        if(type === "output") gene_pool.addOutputNode(node)
         return node;
     }
 
     public getNode(innovation_number: number, gene_pool: GenePool): NodeGene | undefined {
-        return gene_pool.all_nodes.find(node => node.innovation_number === innovation_number)
+        return gene_pool.allNodes().find(node => node.innovation_number === innovation_number)
     }
 
 }
