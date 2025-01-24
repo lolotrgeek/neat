@@ -1,6 +1,6 @@
 import { runInThisContext } from "vm";
 import { Body } from "../body/Body";
-import { BIRTH_RATE, CULL_THRESHOLD } from "../config";
+import { BIRTH_RATE, CULL_THRESHOLD, MAX_SPECIES } from "../config";
 import { RandomSelector } from "../data_structures/random_selector";
 import { Evolution } from "../Evolution";
 import { GenePool } from "../GenePool";
@@ -24,7 +24,7 @@ export class Environment {
 
     public step() {
         this.speciate()
-        this.cull() // TODO: remove this for energy based survival
+        this.cull()
         this.remove_extinct()
         this.reproduce()
         this.mutate()
@@ -42,16 +42,37 @@ export class Environment {
     }
 
     public assign_species(individual: Body): SpeciesId {
+        // Try to add the individual to an existing species
         for (const species of this.species) {
             if (species.add(individual)) {
-                log(`Added individual to existing species ${species.id}, ${species.individuals} individuals`);
-                return species.id
+                log(`Added individual to existing species ${species.id}, ${species.individuals.length} individuals`);
+                return species.id;
             }
         }
-        const species = new Species(individual, this.evolution, this.genePool)
-        this.species.push(species)
-        log(`Created new species ${species.id}`);
-        return species.id
+
+        // If the individual couldn't be added to an existing species and we haven't reached the max species limit
+        if (this.species.length < MAX_SPECIES) {
+            const newSpecies = new Species(individual, this.evolution, this.genePool);
+            this.species.push(newSpecies);
+            log(`Created new species ${newSpecies.id}`);
+            return newSpecies.id;
+        }
+        // If we have reached the max species limit, find the closest species and add the individual to it
+        // TODO: instead, consider doing a progressive backoff of the speciation threshold in the species.add method
+        let closestSpecies = this.species[Math.floor(Math.random() * this.species.length)];
+        let closestDistance = Infinity;
+        for (const species of this.species) {
+            const distance = individual.distance(species.representative);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestSpecies = species;
+            }
+        }
+
+        closestSpecies._add(individual);
+        log(`Added individual to closest species ${closestSpecies.id}, ${closestSpecies.individuals.length} individuals`);
+        return closestSpecies.id;
+
     }
 
     public breed(parent_1: Body, parent_2: Body): Body {
@@ -98,7 +119,7 @@ export class Environment {
             // generating a genome 
             const child = this.breed(parent1, parent2)
             species._add(child)
-        }        
+        }
     }
 
     /** Mutates all individuals in the environment */
