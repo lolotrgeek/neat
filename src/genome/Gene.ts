@@ -1,15 +1,15 @@
 import { RandomHashSet } from "../data_structures/random_hashset";
 
-export type InnonationNumber = number;
+export type InnovationNumber = number;
 
 export class GeneStore extends RandomHashSet {
     public data: Gene[]
-    public map: Map<InnonationNumber, Gene>
+    public map: Map<InnovationNumber, Gene>
     
     constructor() {
         super();
         this.data = [] as Gene[]
-        this.map = new Map<InnonationNumber, Gene>();
+        this.map = new Map<InnovationNumber, Gene>();
     }
 
     public add_sorted(new_gene: Gene): void {
@@ -27,11 +27,11 @@ export class GeneStore extends RandomHashSet {
 }
 
 export class Gene {
-    public innovation_number: InnonationNumber = 0;
+    public innovation_number: InnovationNumber = 0;
 
     constructor() {}
 
-    public hashCode(): InnonationNumber {
+    public hashCode(): InnovationNumber {
         return this.innovation_number;
     }
 }

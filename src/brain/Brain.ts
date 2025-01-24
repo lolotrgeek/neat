@@ -2,7 +2,7 @@ import { Neuron } from "./Neuron";
 import { Genome } from "../genome/Genome";
 import { NodeGene } from "../genome/Node";
 import { ConnectionGene } from "../genome/Connection";
-import { InnonationNumber } from "../genome/Gene";
+import { InnovationNumber } from "../genome/Gene";
 import { Synapse } from "./Synapse";
 
 export class Brain {
@@ -21,7 +21,7 @@ export class Brain {
         this.nodes = genome.getNodes();
         this.connections = genome.getConnections();
 
-        this.neuronMap = new Map<InnonationNumber, Neuron>();
+        this.neuronMap = new Map<InnovationNumber, Neuron>();
 
         for (let node of this.nodes) {
             const neuron = new Neuron(node.x, node.y);
