@@ -50,6 +50,7 @@
 				<button onclick="stimulate()">Stimulate</button>
 				<button onclick="resetGenome()">Reset</button>
 			</div>
+			<div id="io_count"></div>
 			<canvas id="genomeCanvas" width="800" height="600"></canvas>
 			<div id="stimulateOutput"></div>
 		</div>
@@ -63,6 +64,7 @@
 				const species = await response.json()
 				const speciesList = document.getElementById("speciesList")
 				const populationCount = document.getElementById("populationCount")
+				const inputoutputCount = document.getElementById("io_count")
 				speciesList.innerHTML = ""
 				let totalPopulation = 0
 
@@ -80,9 +82,11 @@
 
 					s.individuals.forEach((ind, iIndex) => {
 						const individualItem = document.createElement("li")
-						individualItem.innerHTML = `Individual ${
-							ind.id
-						} (Score: ${ind.score.toFixed(2)})`
+						individualItem.innerHTML = `Individual ${ind.id.slice(0, 10) + "..."	} (Score: ${ind.score.toFixed(2)})
+						<br>
+						<i>
+						[I: ${ind.brain.input_neurons.length}, O: ${ind.brain.output_neurons.length}] </i>
+						`
 						individualItem.onclick = (event) => {
 							event.stopPropagation()
 							loadGenome(sIndex, iIndex)
