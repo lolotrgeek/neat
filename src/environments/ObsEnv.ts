@@ -4,9 +4,8 @@ import { Actionable } from "../environment/Actionable";
 import { Observable } from "../environment/Observable";
 import { Evolution } from "../Evolution";
 import { GenePool } from "../GenePool";
-import { Sensor } from "../body/Sensor";
-import { Action } from "../body/Action";
 import { randomNormal } from "../utils/randomNormal";
+import { selectRandomIndices } from "../utils/randomIndicies";
 
 // export type Levers = Array<(...args: any[]) => any>
 
@@ -73,10 +72,13 @@ export class ObservationEnvrionment extends Environment {
 
     public spawn() {
         let inputsVal = Math.round(randomNormal(this.observables.length / 2, this.observables.length / 6));
-        let inputs = Math.min(this.observables.length, Math.max(1, inputsVal));
-
+        let inputsCount = Math.min(this.observables.length, Math.max(1, inputsVal));
+    
         let outputsVal = Math.round(randomNormal(this.actionables.length / 2, this.actionables.length / 6));
-        let outputs = Math.min(this.actionables.length, Math.max(1, outputsVal));
+        let outputsCount = Math.min(this.actionables.length, Math.max(1, outputsVal));
+    
+        let inputs = selectRandomIndices(this.observables.length, inputsCount);
+        let outputs = selectRandomIndices(this.actionables.length, outputsCount);
 
         let genome = this.evolution.new_genome(this.genePool, inputs, outputs)
         let body = new Body(genome)
