@@ -1,3 +1,9 @@
+/**
+ * Randomly generate a number from a normal distribution
+ * @param mean 
+ * @param stdDev 
+ * @returns 
+ */
 export function randomNormal(mean: number, stdDev: number): number {
     let u1 = Math.random();
     let u2 = Math.random();
