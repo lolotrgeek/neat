@@ -4,6 +4,7 @@ import { ActorGene } from "./genome/Actor";
 import { ConnectionGene } from "./genome/Connection";
 import { Genome } from "./genome/Genome";
 import { NodeGene } from "./genome/Node";
+import { SenseGene } from "./genome/Sense";
 
 /**
  * Rules for evolving a population of genomes
@@ -29,32 +30,38 @@ export class Evolution {
      * 
      * `NOTE:` must populate gene pool with nodes first! Call this.reset()
      * @param gene_pool 
-     * @param inputs 
-     * @param outputs 
+     * @param inputs an array of input mappings to observables indicies
+     * @param outputs an array of output mappings to observables indicies
      * @returns 
      */
-    public new_genome(gene_pool: GenePool, inputs = 3, outputs = 3): Genome {
+    public new_genome(gene_pool: GenePool, inputs = [1,2,3], outputs = [1,2,3]): Genome {
         const genome = new Genome();
-        if (inputs > this.longest_input_size) {
-            this.longest_input_size = inputs
+        if (inputs.length > this.longest_input_size) {
+            this.longest_input_size = inputs.length
         }
-        if (outputs > this.longest_output_size) {
-            this.longest_output_size = outputs
+        if (outputs.length > this.longest_output_size) {
+            this.longest_output_size = outputs.length
         }
 
-        for (let i = 0; i < inputs; i++) {
+        for (let i = 0; i < inputs.length; i++) {
             genome.nodes.add(gene_pool.input_nodes[i]);
+            let sense = new SenseGene()
+            sense.frequency = inputs[i] 
+            genome.senses.add(sense);
         }
 
-        for (let i = 0; i < outputs; i++) {
+        for (let i = 0; i < outputs.length; i++) {
             genome.nodes.add(gene_pool.output_nodes[i]);
+            let actor = new ActorGene()
+            actor.frequency = outputs[i]
+            genome.actors.add(actor);
         }
         return genome;
     }
 
     /**
      * Create a child genome from two parent genomes
-     * @param genome1 The first parent genome
+     * @param genome1 The first parent genome (fittest)
      * @param genome2 The second parent genome
      */
     public crossover(genome1: Genome, genome2: Genome, gene_pool: GenePool): Genome {
@@ -105,6 +112,10 @@ export class Evolution {
                 child.nodes.add(node_2);
             }
         }
+
+        // inherit senses and actors from fittest parent
+        child.senses = genome1.senses;
+        child.actors = genome1.actors
 
         return child;
 

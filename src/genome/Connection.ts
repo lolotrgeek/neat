@@ -5,7 +5,7 @@ import { NodeGene } from "./Node";
 export class ConnectionGene extends Gene {
     public from: NodeGene
     public to: NodeGene
-
+    /** Amount of influence output of "from" node exerts on input of "to" node */
     public weight: number = 1
     public enabled: boolean = true
 

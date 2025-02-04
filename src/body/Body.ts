@@ -20,6 +20,8 @@ export class Body {
     constructor(genome: Genome) {
         this.genome = genome
         this.brain = new Brain(genome)
+        this.sensors = genome.senses.getAll().map(sense => new Sensor(sense.frequency))
+        this.actions = genome.actors.getAll().map(actor => new Action(actor.frequency))
     }
 
     public distance(body: Body): number {

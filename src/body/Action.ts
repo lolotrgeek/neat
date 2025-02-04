@@ -2,7 +2,9 @@
 export class Action {
     /** The index of the actionable from the environment this action invokes */
     actionable: number = 0
-    constructor() { }
+    constructor(actionable: number) {
+        this.actionable = actionable
+     }
 
     /** Decode the brain output and return the value */
     act(output: number): number {

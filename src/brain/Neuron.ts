@@ -10,7 +10,7 @@ export class Neuron {
 
     public output: number = 0;
 
-    /** Which other neurons are we connected from */
+    /** Which other neurons is this neuron connected from (it's inputs) */
     public connections: Synapse[] = [];
 
     constructor(x: number, y: number) {

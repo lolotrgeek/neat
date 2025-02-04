@@ -1,7 +1,9 @@
 import { DISJOINT_IMPORTANCE, EXCESS_IMPORTANCE, WEIGHT_DIFFERENCE_IMPORTANCE } from "../config";
+import { ActorGene } from "./Actor";
 import { ConnectionGene } from "./Connection";
 import { GeneStore } from "./Gene";
 import { NodeGene } from "./Node";
+import { SenseGene } from "./Sense";
 
 /**
  * A Genome is a collection of genes with instructions to spawn a Body with inputs (senses), outputs (actors), & brain (neural network)
@@ -9,6 +11,8 @@ import { NodeGene } from "./Node";
 export class Genome {
     public connections = new GeneStore();
     public nodes = new GeneStore();
+    public senses = new GeneStore();
+    public actors = new GeneStore();
 
     constructor() { }
 
