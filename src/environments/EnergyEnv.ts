@@ -4,8 +4,6 @@ import { Actionable } from "../environment/Actionable";
 import { Observable } from "../environment/Observable";
 import { Evolution } from "../Evolution";
 import { GenePool } from "../GenePool";
-import { Sensor } from "../body/Sensor";
-import { Action } from "../body/Action";
 import { randomNormal } from "../utils/randomNormal";
 import { selectRandomIndices } from "../utils/randomIndicies";
 
@@ -18,6 +16,8 @@ export class EnergyEnvrionment extends Environment {
     public actionables: Actionable[] = []
     public population_size: number
     public population: number = 0
+
+    public energy: number = 0
 
     constructor(observables: Observable[], actionables: Actionable[]) {
         const genePool = new GenePool()
@@ -38,12 +38,10 @@ export class EnergyEnvrionment extends Environment {
             for (let i = 0; i < species.individuals.length; i++) {
                 let individual = species.individuals[i]
                 // let inputs = individual.sensors.map((observable, i) => this.observables[i].observe() )
-                // TODO: we may want to get rid of sensors and connect the observables directly to the brain
                 let inputs = individual.brain.input_neurons.map((neuron, n) => this.observables[n].observe())
 
                 let outputs = individual.brain.think(inputs)
 
-                // TODO: we may want to get rid of actions and connect actionables directly to the brain
                 let actions = outputs.map((output, i) => this.actionables[i].act(output))
                 // individual.actions.map((action, i) => this.actionables[action.actionable].act(outputs[i]))
                 individual.score = this.randomScore()
@@ -73,18 +71,20 @@ export class EnergyEnvrionment extends Environment {
     }
 
     public spawn() {
+
         let inputsVal = Math.round(randomNormal(this.observables.length / 2, this.observables.length / 6));
         let inputsCount = Math.min(this.observables.length, Math.max(1, inputsVal));
     
         let outputsVal = Math.round(randomNormal(this.actionables.length / 2, this.actionables.length / 6));
         let outputsCount = Math.min(this.actionables.length, Math.max(1, outputsVal));
     
-        // Now select the actual indices for inputs and outputs
         let inputs = selectRandomIndices(this.observables.length, inputsCount);
         let outputs = selectRandomIndices(this.actionables.length, outputsCount);
-        
+
         let genome = this.evolution.new_genome(this.genePool, inputs, outputs)
         let body = new Body(genome)
+        const randomEnergy = Math.floor(Math.random() * this.energy);
+        body.energy = randomEnergy;
         // console.log(`Spawned body with ${inputs} inputs and ${outputs} outputs`)
         // call mutate_link between 10 and 20 times
         for (let i = 0; i < Math.floor(Math.random() * 10) + 10; i++) this.evolution.mutate_link(genome, this.genePool)

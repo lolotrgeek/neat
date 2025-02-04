@@ -16,6 +16,8 @@ export class Body {
     public species: SpeciesId | null = null
     /** the individual's fitness */
     public score: number = 0
+    /** the individual's available energy to take actions */
+    public energy: number = 0
 
     constructor(genome: Genome) {
         this.genome = genome
