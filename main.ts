@@ -1,12 +1,20 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { parse } from 'url';
-import { ObservationEnvrionment } from './src/environments/ObsEnv';
 import { Observable } from './src/environment/Observable';
 import { Actionable } from './src/environment/Actionable';
+import { EnergyEnvrionment } from './src/environments/EnergyEnv';
+
+const buy = new Actionable()
+const sell = new Actionable()
+const send = new Actionable()
+const mate = new Actionable()
 
 const observables = Array.from({ length: 10 }, () => new Observable())
-const actionables = Array.from({ length: 3 }, () => new Actionable())
-const environment = new ObservationEnvrionment(observables, actionables)
+const actionables = [buy, sell, send, mate]
+const actionableCosts = [100, 100, 100, 100]
+
+const environment = new EnergyEnvrionment(observables, actionables)
+environment.energy = 1_000_000
 environment.reset()
 environment.populate(environment.population_size)
 
@@ -39,7 +47,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
 
   switch (path) {
     case '/':
-      res.end(JSON.stringify(environment.species));
+      res.end(JSON.stringify(environment));
       break;
     case '/genome':
       res.end(JSON.stringify(genome));
