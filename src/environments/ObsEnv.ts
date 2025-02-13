@@ -42,7 +42,7 @@ export class ObservationEnvrionment extends Environment {
                 let outputs = individual.brain.think(inputs)
 
                 // TODO: we may want to get rid of actions and connect actionables directly to the brain
-                let actions = outputs.map((output, i) => this.actionables[i].act(output))
+                let actions = outputs.map((output, i) => this.actionables[i].act(output, individual))
                 // individual.actions.map((action, i) => this.actionables[action.actionable].act(outputs[i]))
                 individual.score = this.randomScore()
                 // console.log(individual.genome.getConnections().map(c => c.innovation_number).join(' '))
