@@ -9,6 +9,26 @@ import { selectRandomIndices } from "../utils/randomIndicies";
 
 // export type Levers = Array<(...args: any[]) => any>
 
+export class Buy extends Actionable {
+    constructor() { super() }
+
+    act(input: number, individual: Body): number {
+        console.log(`Buying ${input} at ${individual.energy}`)
+        individual.energy -= input
+        return Math.random()
+    }
+}
+
+export class Sell extends Actionable {
+    constructor() { super() }
+
+    act(input: number, individual: Body): number {
+        console.log(`Selling ${input} at ${individual.energy}`)
+        individual.energy += input
+        return Math.random()
+    }
+}
+
 export class EnergyEnvrionment extends Environment {
     public observables: Observable[] = []
 
@@ -42,14 +62,17 @@ export class EnergyEnvrionment extends Environment {
 
                 let outputs = individual.brain.think(inputs)
 
-                let actions = outputs.map((output, i) => this.actionables[i].act(output))
+                let actions = outputs.map((output, i) => this.actionables[i].act(output, individual))
                 // individual.actions.map((action, i) => this.actionables[action.actionable].act(outputs[i]))
-                individual.score = this.randomScore()
+                individual.score = individual.energy
                 // console.log(individual.genome.getConnections().map(c => c.innovation_number).join(' '))
-                if (individual.score < 0.01) {
-                    console.log(`Culling individual with score ${individual.score}`)
+                if (individual.energy < 0.01) {
+                    console.log(`Culling individual with score ${individual.energy}`)
                     const speciesIndex = this.species.findIndex(species => species.id === individual.species)
                     if (speciesIndex > -1) {
+                        let individual_energy = this.species[speciesIndex].individuals[i].energy
+                        this.energy += individual_energy
+                        this.species[speciesIndex].individuals[i].energy = 0
                         this.species[speciesIndex].individuals.splice(i, 1)
                         if (this.species[speciesIndex].individuals.length === 0) {
                             this.species.splice(speciesIndex, 1) // extinction
