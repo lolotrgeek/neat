@@ -4,7 +4,6 @@ import { randomEnv } from "./src/environments/randomEnv";
 
 const environment = new randomEnv()
 environment.reset()
-
 environment.step()
 setInterval(() => environment.step(), 1000)
 

@@ -38,7 +38,8 @@
         context.clearRect(0, 0, displayWidth, displayHeight);
 
         const size = data.size; // expected { x: number, y: number }
-        const vectors = data.registeredVectors;
+        const generators = data.generators || [];
+        const creatures = data.creatures || [];
         const scaleX = displayWidth / size.x;
         const scaleY = displayHeight / size.y;
 
@@ -58,21 +59,19 @@
         }
 
         // Draw each registered vector.
-        vectors.forEach(vectorData => {
-          const loc = vectorData.location;
-          const range = vectorData.range;
+        generators.forEach(generator => {
+          const loc = generator.location;
+          const range = generator.range;
           
           // Scale the location and range.
           const x = loc.x * scaleX;
           const y = loc.y * scaleY;
           const scaledRange = range * ((scaleX + scaleY) / 2);
           
-          console.log(vectorData.vector);
-          // Derive a color from the vector's data using vector[0], vector[2], vector[4] if available.
-          const r = Math.floor(((vectorData.vector[1] ?? 0) * 255));
-          const g = Math.floor(((vectorData.vector[3] ?? 0) * 255));
-          const b = Math.floor(((vectorData.vector[5] ?? 0) * 255));
-          console.log(r, g, b);
+          // Derive a color from the vector's data using vector[1], vector[3], vector[5].
+          const r = Math.floor(((generator.output[1] ?? 0) * 255));
+          const g = Math.floor(((generator.output[3] ?? 0) * 255));
+          const b = Math.floor(((generator.output[5] ?? 0) * 255));
           const fillColor = `rgba(${r}, ${g}, ${b}, 0.25)`;
           const strokeColor = `rgb(${r}, ${g}, ${b})`;
           
@@ -98,7 +97,49 @@
           // Display the vector name near the point.
           context.font = "10px Arial";
           context.fillStyle = "#e0e0e0";
-          context.fillText(vectorData.name, x + 5, y - 5);
+          context.fillText(generator.id, x + 5, y - 5);
+        });
+
+        // Draw each creature.
+        creatures.forEach(creature => {
+          const loc = creature.location;
+          const range = creature.range;
+          
+          // Scale location and output range.
+          const x = loc.x * scaleX;
+          const y = loc.y * scaleY;
+          const scaledOutput = range * ((scaleX + scaleY) / 2);
+          
+          // Derive a color from the creature's vector using creature.vector[0], [2], [4] if available.
+          const r = Math.floor(((creature.output[0] ?? 0) * 255));
+          const g = Math.floor(((creature.output[2] ?? 0) * 255));
+          const b = Math.floor(((creature.output[4] ?? 0) * 255));
+          const fillCreature = `rgba(${r}, ${g}, ${b}, 0.25)`;
+          const strokeCreature = `rgb(${r}, ${g}, ${b})`;
+          
+          // Draw the filled circle representing the creature's output range.
+          context.beginPath();
+          context.arc(x, y, scaledOutput, 0, 2 * Math.PI);
+          context.fillStyle = fillCreature;
+          context.fill();
+          
+          // Draw the border of the output range circle.
+          context.beginPath();
+          context.arc(x, y, scaledOutput, 0, 2 * Math.PI);
+          context.strokeStyle = strokeCreature;
+          context.lineWidth = 2;
+          context.stroke();
+          
+          // Draw the creature point.
+          context.beginPath();
+          context.arc(x, y, 3, 0, 2 * Math.PI);
+          context.fillStyle = strokeCreature;
+          context.fill();
+          
+          // Display the creature's ID near the point.
+          context.font = "10px Arial";
+          context.fillStyle = "#e0e0e0";
+          context.fillText(creature.output, x + 5, y - 5);
         });
       }
 
