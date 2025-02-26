@@ -9,12 +9,16 @@
   "author": "lolotrgeek",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^22.10.6",
     "@babel/preset-typescript": "^7.23.3",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.6",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "json-normalizer": "file:../json-normalizer/json-normalizer-0.0.1.tgz",
+    "zeromq": "^6.3.0"
   }
 }
