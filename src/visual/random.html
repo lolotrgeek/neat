@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Random Environment Visualization - Dark Mode</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: sans-serif;
+      }
+      canvas {
+        border: 1px solid #555;
+        display: block;
+        margin: 20px auto;
+        background-color: #1e1e1e;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="envCanvas"></canvas>
+    <script>
+      // Set up the canvas.
+      const canvas = document.getElementById("envCanvas");
+      const context = canvas.getContext("2d");
+
+      // Define display dimensions.
+      const displayWidth = 500;
+      const displayHeight = 500;
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+
+      // Function to draw the environment based on fetched data.
+      function drawEnvironment(data) {
+        // Clear the canvas.
+        context.clearRect(0, 0, displayWidth, displayHeight);
+
+        const size = data.size; // expected { x: number, y: number }
+        const vectors = data.registeredVectors;
+        const scaleX = displayWidth / size.x;
+        const scaleY = displayHeight / size.y;
+
+        // Draw grid background.
+        context.strokeStyle = "#333";
+        for (let i = 0; i <= size.x; i++) {
+          context.beginPath();
+          context.moveTo(i * scaleX, 0);
+          context.lineTo(i * scaleX, displayHeight);
+          context.stroke();
+        }
+        for (let j = 0; j <= size.y; j++) {
+          context.beginPath();
+          context.moveTo(0, j * scaleY);
+          context.lineTo(displayWidth, j * scaleY);
+          context.stroke();
+        }
+
+        // Draw each registered vector.
+        vectors.forEach(vectorData => {
+          const loc = vectorData.location;
+          const range = vectorData.range;
+          
+          // Scale the location and range.
+          const x = loc.x * scaleX;
+          const y = loc.y * scaleY;
+          const scaledRange = range * ((scaleX + scaleY) / 2);
+          
+          console.log(vectorData.vector);
+          // Derive a color from the vector's data using vector[0], vector[2], vector[4] if available.
+          const r = Math.floor(((vectorData.vector[1] ?? 0) * 255));
+          const g = Math.floor(((vectorData.vector[3] ?? 0) * 255));
+          const b = Math.floor(((vectorData.vector[5] ?? 0) * 255));
+          console.log(r, g, b);
+          const fillColor = `rgba(${r}, ${g}, ${b}, 0.25)`;
+          const strokeColor = `rgb(${r}, ${g}, ${b})`;
+          
+          // Draw the filled circle representing the vector's range.
+          context.beginPath();
+          context.arc(x, y, scaledRange, 0, 2 * Math.PI);
+          context.fillStyle = fillColor;
+          context.fill();
+          
+          // Draw the border of the circle.
+          context.beginPath();
+          context.arc(x, y, scaledRange, 0, 2 * Math.PI);
+          context.strokeStyle = strokeColor;
+          context.lineWidth = 2;
+          context.stroke();
+          
+          // Draw the vector point.
+          context.beginPath();
+          context.arc(x, y, 3, 0, 2 * Math.PI);
+          context.fillStyle = strokeColor;
+          context.fill();
+          
+          // Display the vector name near the point.
+          context.font = "10px Arial";
+          context.fillStyle = "#e0e0e0";
+          context.fillText(vectorData.name, x + 5, y - 5);
+        });
+      }
+
+      // Function to fetch data and redraw the environment.
+      function fetchData() {
+        fetch("http://localhost:3700")
+          .then(response => response.json())
+          .then(data => {
+            drawEnvironment(data);
+          })
+          .catch(error => {
+            console.error("Error fetching environment data:", error);
+          });
+      }
+
+      // Fetch the environment data every second.
+      fetchData(); // Initial fetch.
+      setInterval(fetchData, 1000);
+    </script>
+  </body>
+</html>
