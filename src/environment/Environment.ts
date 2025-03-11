@@ -1,4 +1,3 @@
-import { runInThisContext } from "vm";
 import { Body } from "../body/Body";
 import { BIRTH_RATE, CULL_THRESHOLD, MAX_SPECIES } from "../config";
 import { RandomSelector } from "../data_structures/random_selector";
@@ -132,5 +131,8 @@ export class Environment {
     public individuals(): Body[] {
         return this.species.flatMap(species => species.individuals)
     }
+
+    public reset() {}
+
 
 }
