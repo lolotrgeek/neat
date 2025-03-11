@@ -59,6 +59,7 @@ export class RandomGenerator {
 
     public generateRandomData() {
         const data = {
+            currentTime: Date.now(), 
             id: Math.random().toString(36),
             name: `name${Math.random().toString(36)}`,
             value: Math.random() * 100,
@@ -74,7 +75,8 @@ export class RandomGenerator {
 
 export class Creature extends RandomGenerator {
     public subs: Record<string, Sub> = {}
-    public memory: number[] = []
+    public memory: number[][] = []
+    public manipulators: number[] = []
 
     constructor(id: string, location: { x: number; y: number }) {
         super(id, location)
@@ -102,6 +104,7 @@ export class Creature extends RandomGenerator {
             sub.on((message) => {
                 if (message && message.output) {
                     const input = message.output as number[]
+                    // NOTE: put neural network here
                     this.mutateInput(input)
                 }
             })
@@ -123,6 +126,23 @@ export class Creature extends RandomGenerator {
         }
         else this.output = []
     }
+
+    public memorize(input: number[]) {
+        this.memory.push(input)
+    }
+
+
+    public recall() {
+        if (this.memory.length > 0) return this.memory.pop();
+        else return []
+    }
+
+    /** Randomly recall memories */
+    public remember() {
+        const index = Math.floor(Math.random() * this.memory.length);
+        return this.memory[index];
+    }
+
 }
 
 export class randomEnv extends Environment {
@@ -175,16 +195,24 @@ export class randomEnv extends Environment {
         // TODO: sub to the creature if we are spawning it in a new process
     }
 
-    // Helper to clamp values.
-    private clamp(val: number, min: number, max: number): number {
+
+    public clamp(val: number, min: number, max: number): number {
         return Math.min(Math.max(val, min), max);
     }
 
-    // New method: updates one creature.
+    public move(creature: Creature, x_delta: number, y_delta: number) {
+        creature.location.x = this.clamp(creature.location.x + x_delta, 0, this.size.x)
+        creature.location.y = this.clamp(creature.location.y + y_delta, 0, this.size.y)
+    }
+
+
+    // updates one creature.
     private updateCreature(creature: Creature): void {
-        // Move randomly: add a small delta from -1 to 1.
-        creature.location.x = this.clamp(creature.location.x + Math.floor((Math.random() - 0.5) * 3), 0, this.size.x - 1);
-        creature.location.y = this.clamp(creature.location.y + Math.floor((Math.random() - 0.5) * 3), 0, this.size.y - 1);
+        // Use the first two elements of creature.output as normalized movement deltas.
+        // Assuming creature.output values are in [0, 1], we transform them to [-1, 1].
+        const dx = (((creature.output[0] ?? 0.5) - 0.5) * 2);
+        const dy = (((creature.output[1] ?? 0.5) - 0.5) * 2);
+        this.move(creature, dx, dy);
 
         this.generators.forEach(vec => {
             const dx = vec.location.x - creature.location.x;
@@ -230,7 +258,8 @@ export class randomEnv extends Environment {
                 // Spawn new creature if fewer than 5 exist.
                 this.generateRandomCreature();
             } else {
-                // Update each creature: move and update vector based on nearby inputs.
+                
+                // 
                 this.creatures.forEach(creature => {
                     this.updateCreature(creature);
                     console.log(`Updated creature ${creature.id}: location (${creature.location.x}, ${creature.location.y})`);

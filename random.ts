@@ -1,5 +1,4 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
-import { parse } from 'url';
 import { randomEnv } from "./src/environments/randomEnv";
 
 const environment = new randomEnv()
@@ -23,6 +22,9 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   switch (path) {
     case '/':
       res.end(JSON.stringify(environment));
+      break;
+    case '/creatures':
+      res.end(JSON.stringify(environment.creatures));
       break;
     default:
       res.end(JSON.stringify({ message: 'Unknown endpoint' }));
